@@ -22,17 +22,7 @@ jobs:
       - name: İkonları üret
         run: npx @capacitor/assets generate --android
       - name: Ekran yönünü ayarla
-        run: sed -i 's/<activity /<activity android:screenOrientation="portrait" /' android/app/src/main/AndroidManifest.xml
-      - name: Sürüm numarasını artır
-        run: |
-          VC=$(( $(date +%s) / 60 ))
-          sed -i "s/versionCode [0-9]*/versionCode $VC/" android/app/build.gradle
-          sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
-      - name: Sabit imza anahtarı (üstüne güncelleme için)
-        uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: debug-keystore-v1
+        run: sed -i 's/<activity /<activity android:screenOrientation="landscape" /' android/app/src/main/AndroidManifest.xml
       - name: APK derle
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
