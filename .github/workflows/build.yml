@@ -3,6 +3,9 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,6 +18,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: npm önbelleği
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      - name: Gradle önbelleği
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: gradle-${{ runner.os }}-
       - name: Bağımlılıkları kur
         run: npm install
       - name: Android projesini oluştur
@@ -22,7 +39,7 @@ jobs:
       - name: İkonları üret
         run: npx @capacitor/assets generate --android
       - name: Ekran yönünü ayarla
-        run: sed -i 's/<activity /<activity android:screenOrientation="landscape" /' android/app/src/main/AndroidManifest.xml
+        run: sed -i 's/<activity /<activity android:screenOrientation="portrait" /' android/app/src/main/AndroidManifest.xml
       - name: Sürüm numarasını artır
         run: |
           VC=$(( $(date +%s) / 60 ))
